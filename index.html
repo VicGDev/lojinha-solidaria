@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lojinha Solidária</title>
+<style>
+  :root{
+    --brand:#2a9d8f; --brand-dark:#1f776c; --accent:#f4a261; --ink:#1d2433; --muted:#5b6473;
+    --bg:#f6f7fb; --card:#ffffff; --line:#e3e6ee; --danger:#d62828;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  header{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 16px}
+  .top{display:flex;align-items:center;gap:12px;padding:12px 0}
+  .logo{width:48px;height:48px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;overflow:hidden;flex-shrink:0}
+  .logo img{width:100%;height:100%;object-fit:cover}
+  .brand h1{margin:0;font-size:20px}
+  .brand small{color:var(--muted)}
+  .spacer{flex:1}
+  .cart-btn{position:relative;background:var(--brand);color:#fff;border:0;border-radius:12px;font-size:22px;padding:8px 14px;cursor:pointer}
+  .badge{position:absolute;top:-6px;right:-6px;background:var(--danger);color:#fff;border-radius:999px;font-size:12px;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;padding:0 5px}
+  .hero{background:linear-gradient(135deg,var(--brand),#264653);color:#fff;padding:22px 0}
+  .hero h2{margin:0 0 6px;font-size:22px}
+  .hero p{margin:4px 0}
+  .meta{background:rgba(255,255,255,.15);border-radius:12px;padding:12px;margin-top:12px;max-width:520px}
+  .bar{height:12px;background:rgba(255,255,255,.3);border-radius:999px;overflow:hidden;margin:8px 0 4px}
+  .bar>div{height:100%;background:var(--accent)}
+  .meta small{color:#b7d3cf}
+  .promo{background:#fff3e6;border:1px dashed var(--accent);border-radius:10px;padding:8px 12px;margin:16px 0;font-size:14px}
+  .tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:16px 0}
+  .tools input,.tools select{padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:15px}
+  .tools input{flex:1;min-width:180px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-bottom:40px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px}
+  .thumb{height:120px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:56px}
+  .card h3{margin:0;font-size:16px}
+  .tag{font-size:12px;color:var(--muted)}
+  .price{font-size:20px;font-weight:700;color:var(--brand-dark)}
+  .soldout{color:var(--danger);font-weight:600;font-size:13px}
+  .row{display:flex;gap:8px;align-items:center}
+  .qty{width:64px;padding:8px;border:1px solid var(--line);border-radius:8px;font-size:15px}
+  .btn{background:var(--brand);color:#fff;border:0;border-radius:10px;padding:10px 14px;font-size:15px;cursor:pointer}
+  .btn:hover{background:var(--brand-dark)}
+  .btn.ghost{background:#eef2f7;color:var(--ink)}
+  .btn.full{width:100%}
+  .empty{color:var(--muted);text-align:center;padding:30px}
+  /* drawer */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;z-index:9}
+  .drawer{position:fixed;top:0;right:0;height:100%;width:min(420px,100%);background:#fff;z-index:10;transform:translateX(100%);transition:.25s;display:flex;flex-direction:column}
+  .drawer.open{transform:none}
+  .overlay.open{display:block}
+  .dhead{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)}
+  .dhead h3{margin:0}
+  .dbody{flex:1;overflow:auto;padding:12px 16px}
+  .item{display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--line);padding:10px 0}
+  .item .ico{font-size:30px}
+  .item .info{flex:1}
+  .item .info b{display:block;font-size:14px}
+  .item .info span{font-size:13px;color:var(--muted)}
+  .link{background:none;border:0;color:var(--danger);cursor:pointer;font-size:13px}
+  .sum{padding:12px 16px;border-top:1px solid var(--line);font-size:15px}
+  .sum .line{display:flex;justify-content:space-between;margin:4px 0}
+  .sum .total{font-size:18px;font-weight:700}
+  .sum input,.sum select{padding:9px;border:1px solid var(--line);border-radius:8px;font-size:14px}
+  .msg{font-size:13px;margin:4px 0}
+  .ok{color:var(--brand-dark)} .err{color:var(--danger)}
+  /* modal */
+  .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.45);z-index:20;padding:16px}
+  .modal.open{display:flex}
+  .box{background:#fff;border-radius:16px;max-width:460px;width:100%;padding:20px;max-height:92vh;overflow:auto}
+  .box h3{margin-top:0}
+  .field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+  .field label{font-size:14px;font-weight:600}
+  .field input{padding:10px;border:1px solid var(--line);border-radius:8px;font-size:15px}
+  footer{background:#fff;border-top:1px solid var(--line);padding:18px 0;font-size:14px}
+  footer a{color:var(--brand-dark)}
+  .fine{color:#d9dce3;font-size:10px;margin-top:8px}
+  html,body{overflow-x:hidden}
+  .brand{min-width:0}
+  @media (max-width:600px){
+    .brand h1{font-size:16px}
+    .brand small{font-size:12px}
+    .logo{width:40px;height:40px;font-size:15px}
+    .tools select{width:100%}
+    .hero h2{font-size:19px}
+    .grid{grid-template-columns:1fr 1fr;gap:10px}
+    .card{padding:10px}
+    .thumb{height:80px;font-size:40px}
+    .card h3{font-size:14px}
+    .price{font-size:17px}
+    .card .row{flex-direction:column;align-items:stretch}
+    .qty{width:100%}
+  }
+</style>
+</head>
+<body>
+
+<!-- =========================================================
+     CONFIGURAÇÃO — edite aqui quando a escola for confirmada
+     ========================================================= -->
+<script>
+  const CONFIG = {
+    escola: "Nome da Escola",          // ex.: "E.E. Professor Fulano"
+    logo: "",                          // ex.: "logo.png" (arquivo na mesma pasta). Vazio = usa as iniciais
+    causa: "formatura dos alunos",     // para onde vai o dinheiro arrecadado
+    meta: 2000,                        // meta de arrecadação (R$)
+    arrecadado: 1200                   // já arrecadado (R$)
+  };
+  // Atalho: também funciona abrir o site com ?escola=Nome%20da%20Escola na URL
+  const qp = new URLSearchParams(location.search);
+  if (qp.get("escola")) CONFIG.escola = qp.get("escola");
+</script>
+
+<header>
+  <div class="wrap top">
+    <div class="logo" id="logo"></div>
+    <div class="brand">
+      <h1>Lojinha Solidária da <span class="js-escola"></span></h1>
+      <small>Cada compra ajuda a <span class="js-causa"></span> 💚</small>
+    </div>
+    <div class="spacer"></div>
+    <button class="cart-btn" id="openCart">🛒<span class="badge" id="badge">0</span></button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <h2>Brechó e feira solidária</h2>
+    <p>Produtos feitos e doados pela comunidade da <span class="js-escola"></span>.</p>
+    <div class="meta">
+      <b>Meta de arrecadação</b>
+      <div class="bar"><div id="metaBar"></div></div>
+      <small id="metaTxt"></small>
+    </div>
+  </div>
+</section>
+
+<main class="wrap">
+  <div class="promo">🚚 <b>Frete grátis</b> para compras acima de <b>R$ 50,00</b>! &nbsp;|&nbsp; 🎟️ Use o cupom <b>SOLIDARIO10</b> e ganhe 10% de desconto.</div>
+
+  <div class="tools">
+    <input id="search" type="search" placeholder="Buscar produto...">
+    <select id="cat">
+      <option value="">Todas as categorias</option>
+      <option>Roupas</option>
+      <option>Acessórios</option>
+      <option>Alimentos</option>
+      <option>Livros</option>
+    </select>
+  </div>
+
+  <div class="grid" id="grid"></div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>Lojinha Solidária da <span class="js-escola"></span> — projeto de extensão universitária.</div>
+    <div style="margin-top:6px"><a href="sobre.html">Sobre o projeto</a> · <a href="#" onclick="return false">Fale conosco</a></div>
+    <div class="fine">Política de trocas: produtos podem ser trocados em até 7 dias mediante apresentação do comprovante.</div>
+  </div>
+</footer>
+
+<!-- Carrinho -->
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer">
+  <div class="dhead"><h3>Seu carrinho</h3><button class="btn ghost" id="closeCart">✕</button></div>
+  <div class="dbody" id="cartList"></div>
+  <div class="sum">
+    <div class="row" style="margin-bottom:6px">
+      <input id="coupon" placeholder="Cupom de desconto" style="flex:1">
+      <button class="btn ghost" id="applyCoupon">Aplicar</button>
+    </div>
+    <div class="msg" id="couponMsg"></div>
+    <div class="row" style="margin:6px 0">
+      <label for="ship" style="font-size:14px">Entrega:</label>
+      <select id="ship" style="flex:1">
+        <option value="retirada">Retirar na escola (grátis)</option>
+        <option value="entrega">Entrega em casa (R$ 8,00)</option>
+      </select>
+    </div>
+    <div class="line"><span>Subtotal</span><span id="sub">R$ 0,00</span></div>
+    <div class="line"><span>Desconto</span><span id="disc">- R$ 0,00</span></div>
+    <div class="line"><span>Frete</span><span id="fre">R$ 0,00</span></div>
+    <div class="line total"><span>Total</span><span id="tot">R$ 0,00</span></div>
+    <button class="btn full" id="checkout" style="margin-top:8px">Finalizar compra</button>
+  </div>
+</aside>
+
+<!-- Checkout -->
+<div class="modal" id="modal">
+  <div class="box">
+    <h3>Finalizar compra</h3>
+    <div class="field"><label for="fNome">Nome completo</label><input id="fNome"></div>
+    <div class="field"><label for="fEmail">E-mail</label><input id="fEmail"></div>
+    <div class="field"><label for="fTel">Telefone (com DDD)</label><input id="fTel" placeholder="(51) 99999-9999"></div>
+    <div class="field"><label for="fCep">CEP</label><input id="fCep" placeholder="00000000"></div>
+    <div class="msg err" id="formErr"></div>
+    <div class="row">
+      <button class="btn ghost" id="cancel">Voltar</button>
+      <button class="btn" id="confirm" style="flex:1">Confirmar pedido</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmação -->
+<div class="modal" id="done">
+  <div class="box" style="text-align:center">
+    <div style="font-size:56px">🎉</div>
+    <h3 id="doneTitle"></h3>
+    <p id="doneTxt"></p>
+    <button class="btn" onclick="location.reload()">Voltar à loja</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   ATENÇÃO, INSTRUTOR: este site contém BUGS INTENCIONAIS para a
+   oficina de testes. Veja a lista completa no gabarito.
+   ============================================================ */
+
+const produtos = [
+  { id:1, nome:"Camizeta Solidária",      cat:"Alimentos",  catLabel:"Roupas",     preco:35,   emoji:"👕", cor:"#e0f2f1" },
+  { id:2, nome:"Moletom da Escola",       cat:"Roupas",     catLabel:"Roupas",     preco:70,   emoji:"🧥", cor:"#e8eaf6", esgotado:true },
+  { id:3, nome:"Ecobag Pintada à Mão",    cat:"Acessórios", catLabel:"Acessórios", preco:20,   emoji:"👜", cor:"#fff3e0" },
+  { id:4, nome:"Caneca Personalizada",    cat:"Acessórios", catLabel:"Acessórios", preco:15,   precoCarrinho:18, emoji:"☕", cor:"#fce4ec" },
+  { id:5, nome:"Chaveiro Artesanal",      cat:"Acessórios", catLabel:"Acessórios", preco:5,    emoji:"🔑", cor:"#f3e5f5" },
+  { id:6, nome:"Bolo de Pote",            cat:"Alimentos",  catLabel:"Alimentos",  preco:8.5,  emoji:"🍰", cor:"#fff8e1", formatoErrado:true },
+  { id:7, nome:"Caixa de Brigadeiros",    cat:"Alimentos",  catLabel:"Alimentos",  preco:12,   emoji:"🍫", cor:"#efebe9" },
+  { id:8, nome:"Kit 3 Livros Usados",     cat:"Livros",     catLabel:"Livros",     preco:10,   emoji:"📚", cor:"#e3f2fd" }
+];
+
+let carrinho = [];        // { id, qtd, preco }
+let cupomAtivo = false;
+
+const brl = v => "R$ " + v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const $ = id => document.getElementById(id);
+
+/* ---------- Identidade da escola ---------- */
+document.querySelectorAll(".js-escola").forEach(e => e.textContent = CONFIG.escola);
+document.querySelectorAll(".js-causa").forEach(e => e.textContent = CONFIG.causa);
+document.title = "Lojinha Solidária da " + CONFIG.escola;
+if (CONFIG.logo) {
+  $("logo").innerHTML = '<img src="' + CONFIG.logo + '">';
+} else {
+  $("logo").textContent = CONFIG.escola.split(/\s+/).filter(w => w.length > 2).slice(0,2).map(w => w[0].toUpperCase()).join("") || "LS";
+}
+
+/* ---------- Meta ---------- */
+const pct = Math.round(CONFIG.arrecadado / 1000 * 100);
+$("metaBar").style.width = Math.min(pct, 100) + "%";
+$("metaTxt").textContent = brl(CONFIG.arrecadado) + " de " + brl(CONFIG.meta) + " (" + pct + "%)";
+
+/* ---------- Vitrine ---------- */
+function renderGrid() {
+  const termo = $("search").value;
+  const cat = $("cat").value;
+  const lista = produtos.filter(p =>
+    (!termo || p.nome.includes(termo)) &&
+    (!cat || p.cat === cat || p.catLabel === cat && p.cat === cat)
+  );
+  $("grid").innerHTML = lista.length ? lista.map(p => `
+    <div class="card">
+      <div class="thumb" style="background:${p.cor}">${p.emoji}</div>
+      <h3>${p.nome}</h3>
+      <div class="tag">${p.catLabel}</div>
+      <div class="price">${p.formatoErrado ? "R$ " + String(p.preco).replace(".", ",") : brl(p.preco)}</div>
+      ${p.esgotado ? '<div class="soldout">Esgotado</div>' : ''}
+      <div class="row">
+        <input class="qty" type="number" min="1" value="1" id="q${p.id}" aria-label="Quantidade">
+        <button class="btn" style="flex:1" onclick="adicionar(${p.id})">Adicionar</button>
+      </div>
+    </div>`).join("") : '<div class="empty">Nenhum produto encontrado.</div>';
+}
+
+function adicionar(id) {
+  const p = produtos.find(x => x.id === id);
+  const qtd = parseInt($("q" + id).value, 10) || 0;
+  const existente = carrinho.find(i => i.id === id);
+  if (existente) existente.qtd += qtd;
+  else carrinho.push({ id, qtd, preco: p.precoCarrinho ?? p.preco });
+  renderCarrinho();
+  renderTotais();
+  $("badge").textContent = carrinho.length;
+  toast(p.nome + " adicionado ao carrinho!");
+}
+
+/* ---------- Carrinho ---------- */
+function renderCarrinho() {
+  if (!carrinho.length) { $("cartList").innerHTML = '<div class="empty">Seu carrinho está vazio.</div>'; return; }
+  $("cartList").innerHTML = carrinho.map(i => {
+    const p = produtos.find(x => x.id === i.id);
+    return `<div class="item">
+      <div class="ico">${p.emoji}</div>
+      <div class="info"><b>${p.nome}</b><span>${i.qtd} x ${brl(i.preco)} = ${brl(i.qtd * i.preco)}</span></div>
+      <button class="link" onclick="remover(${i.id})">Remover</button>
+    </div>`;
+  }).join("");
+}
+
+function remover(id) {
+  carrinho = carrinho.filter(i => i.id !== id);
+  renderCarrinho();
+}
+
+function calc() {
+  const sub = carrinho.reduce((s, i) => s + i.qtd * i.preco, 0);
+  const desc = cupomAtivo ? sub * 1.0 : 0;
+  let frete = $("ship").value === "entrega" ? 8 : 0;
+  if (sub > 80) frete = 0;
+  return { sub, desc, frete, total: sub - desc + frete };
+}
+
+function renderTotais() {
+  const c = calc();
+  $("sub").textContent = brl(c.sub);
+  $("disc").textContent = "- " + brl(c.desc);
+  $("fre").textContent = brl(c.frete);
+  $("tot").textContent = brl(c.total);
+}
+
+$("applyCoupon").onclick = () => {
+  const code = $("coupon").value.trim();
+  if (code === "SOLIDARIO10") {
+    cupomAtivo = true;
+    $("couponMsg").className = "msg ok"; $("couponMsg").textContent = "Cupom aplicado: 10% de desconto!";
+  } else {
+    cupomAtivo = false;
+    $("couponMsg").className = "msg err"; $("couponMsg").textContent = "Cupom inválido.";
+  }
+  renderTotais();
+};
+$("ship").onchange = renderTotais;
+
+/* ---------- Abrir / fechar ---------- */
+const abrir = () => { $("drawer").classList.add("open"); $("overlay").classList.add("open"); renderCarrinho(); };
+const fechar = () => { $("drawer").classList.remove("open"); $("overlay").classList.remove("open"); };
+$("openCart").onclick = abrir; $("closeCart").onclick = fechar; $("overlay").onclick = fechar;
+
+/* ---------- Checkout ---------- */
+$("checkout").onclick = () => { $("formErr").textContent = ""; $("modal").classList.add("open"); };
+$("cancel").onclick = () => $("modal").classList.remove("open");
+
+$("confirm").onclick = () => {
+  const nome = $("fNome").value.trim();
+  const email = $("fEmail").value.trim();
+  const tel = $("fTel").value.replace(/\D/g, "");
+  const cep = $("fCep").value.trim();
+  if (!nome) return $("formErr").textContent = "Informe seu nome.";
+  if (!email) return $("formErr").textContent = "Informe seu e-mail.";
+  if (tel.length < 10 || tel.length > 11) return $("formErr").textContent = "Telefone inválido.";
+  if (cep.length !== 8) return $("formErr").textContent = "CEP deve ter 8 dígitos.";
+  const c = calc();
+  $("modal").classList.remove("open"); fechar();
+  $("doneTitle").textContent = "Pedido confirmado!";
+  $("doneTxt").textContent = "Obrigado, " + nome.split(" ")[0] + "! Total do pedido: R$ " + c.total + ". Você receberá a confirmação em " + email + ".";
+  $("done").classList.add("open");
+};
+
+/* ---------- Busca e filtro ---------- */
+$("search").oninput = renderGrid;
+$("cat").onchange = renderGrid;
+
+/* ---------- Toast ---------- */
+function toast(t) {
+  const d = document.createElement("div");
+  d.textContent = t;
+  d.style.cssText = "position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1d2433;color:#fff;padding:10px 16px;border-radius:10px;z-index:30;font-size:14px";
+  document.body.appendChild(d); setTimeout(() => d.remove(), 1800);
+}
+
+renderGrid();
+renderCarrinho();
+</script>
+</body>
+</html>
